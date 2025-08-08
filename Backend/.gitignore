@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.VENV/
+.venv/
+*.sqlite3
+
+# FastAPI + Uvicorn logs
+*.log
+
+# VS Code & IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS/Linux/Windows
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Test outputs
+htmlcov/
+coverage.xml
+.pytest_cache/
+.tox/
+nosetests.xml
+test-results/
+junit-*.xml
+
+# MongoDB dumps
+dump/

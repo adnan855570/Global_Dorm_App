@@ -1,36 +1,44 @@
-import { useState, useEffect } from "react";
+// src/hooks/useDarkMode.js
+import { useEffect, useLayoutEffect, useState } from "react";
 
 /**
- * useDarkMode
- * 
- * Custom React hook for toggling dark mode (light/dark theme) and persisting preference in localStorage.
- * Adds/removes "dark" class to the <html> tag for Tailwind support and sets color scheme for native UI.
- *
- * @returns [dark, setDark] - boolean state, and setter function for toggling.
+ * Robust dark-mode hook:
+ * - Initial: localStorage -> system preference -> light
+ * - Applies/removes "dark" on <html>, <body>, and #root (covers stray classes)
+ * - Sets color-scheme for native form controls
+ * - No flicker (layout effect)
  */
 export default function useDarkMode() {
-  // Initialize state based on localStorage value (default: light)
-  const [dark, setDark] = useState(() => {
-    if (typeof window === "undefined") return false; // SSR safety
-    return localStorage.getItem("theme") === "dark";
-  });
+  const getInitial = () => {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem("theme");
+    if (stored === "dark") return true;
+    if (stored === "light") return false;
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+  };
 
-  // Side effect: Update <html> class and localStorage whenever "dark" changes
-  useEffect(() => {
-    // (Tiny delay for Tailwind + SSR compatibility)
-    setTimeout(() => {
-      if (dark) {
-        document.documentElement.classList.add("dark");
-        document.documentElement.style.colorScheme = "dark";
-        localStorage.setItem("theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.style.colorScheme = "light";
-        localStorage.setItem("theme", "light");
-      }
-    }, 1);
+  const [dark, setDark] = useState(getInitial);
+
+  // Apply before paint
+  useLayoutEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const root = document.getElementById("root");
+
+    // Toggle dark class on all common roots
+    [html, body, root].forEach((el) => {
+      if (!el) return;
+      el.classList.toggle("dark", dark);
+    });
+
+    // Hint to the browser for native controls
+    html.style.colorScheme = dark ? "dark" : "light";
   }, [dark]);
 
-  // Return current mode and setter
+  // Persist preference
+  useEffect(() => {
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
+
   return [dark, setDark];
 }

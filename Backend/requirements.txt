@@ -8,3 +8,4 @@ redis
 httpx
 motor
 email_validator
+locust

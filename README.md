@@ -169,31 +169,28 @@ Below is a quick visual tour of the app. Save your screenshots to `docs/screensh
 
 - **Home Dashboard**: Welcome card with quick links to rooms and applications.
 
-![Home Dashboard](docs/screenshots/home.png)
+<img width="1918" height="872" alt="hoe" src="https://github.com/user-attachments/assets/19909bcc-9746-40ba-b2b9-0eff243fe311" />
+
 
 - **Login**: Secure authentication form with email and password.
 
-![Login](docs/screenshots/login.png)
+<img width="1918" height="866" alt="login" src="https://github.com/user-attachments/assets/dba6c254-199e-4cb6-9c05-b9a9584978ac" />
+
 
 - **Register**: Create a new account to access protected features.
 
-![Register](docs/screenshots/register.png)
+<img width="1918" height="867" alt="register" src="https://github.com/user-attachments/assets/b70b4caa-9326-498d-8a54-801f2e6a5f1c" />
+
 
 - **Applications**: Track your room applications with status badges and cancel action.
 
-![Applications](docs/screenshots/applications.png)
+<img width="1918" height="870" alt="application" src="https://github.com/user-attachments/assets/7bc2aa4d-4b3c-4517-ab1c-4bd4226662de" />
+
 
 - **Rooms**: Browse and filter listings; fetch geocode and distance to campus.
 
-![Rooms](docs/screenshots/rooms.png)
+<img width="1918" height="867" alt="rooms" src="https://github.com/user-attachments/assets/cc9bdfe3-89e2-41b5-9bd7-190f4a2439fe" />
 
-Note: If the images don’t load in GitHub, ensure these files exist:
-
-- `docs/screenshots/home.png`
-- `docs/screenshots/login.png`
-- `docs/screenshots/register.png`
-- `docs/screenshots/applications.png`
-- `docs/screenshots/rooms.png`
 
 ## 🔌 FastAPI Backend & API Endpoints
 
@@ -427,29 +424,51 @@ The application automatically calculates the distance from each room to the camp
 - Smooth transitions and hover effects
 - Accessible form controls and navigation
 
-## 🧪 Testing
+## 🧪 API Load Testing with Locust
 
-### Backend Tests
+We performed API load testing using Locust to validate throughput and latency for key endpoints served by FastAPI.
+
+### Where to run the tests
+
+- Backend service must be running and reachable at the chosen host (default `http://localhost:8000`).
+- Run Locust from the `Backend/` directory so it can find `locustfile.py`.
+
+### Install and start Locust
 
 ```bash
 cd Backend
-python -m pytest tests/
+pip install locust
+locust -f locustfile.py --host http://localhost:8000
 ```
 
-### Frontend Tests
+Open the web UI at `http://localhost:8089`, set Number of users and Spawn rate, then start the test. Monitor charts for RPS, failure rate, and latency percentiles.
 
-```bash
-cd Frontend
-npm run test
-```
+### Test plan (endpoints exercised)
 
-### API Load Testing with Locust
+- GET `/` — API health/root
+- GET `/rooms` — list room listings
+- GET `/external/geocode?postcode=E1 4NS` — geocoding lookup
 
-Basic load testing is included using Locust to stress key FastAPI endpoints.
+### Screenshots
 
-#### Locustfile
+These screenshots illustrate the Locust workflow and results. Save the images to `docs/screenshots/locust/` using the filenames below to render them here.
 
-The `Backend/locustfile.py` defines a `DormUser` that exercises:
+- Start test screen (set users, spawn rate, host)
+
+<img width="1918" height="967" alt="locust" src="https://github.com/user-attachments/assets/d1e4e951-7baa-4b5f-8148-a708d7462781" />
+
+
+- Live charts (RPS and response time percentiles)
+
+<img width="1918" height="968" alt="locust1" src="https://github.com/user-attachments/assets/f7ce61db-75d2-4fed-86f9-29ae78e6f1d9" />
+
+
+- Statistics table (per-endpoint metrics)
+
+<img width="1918" height="972" alt="locust3" src="https://github.com/user-attachments/assets/5e4eb282-1823-4158-8cba-73cd9257d922" />
+
+
+### Locust tasks (as implemented)
 
 ```python
 from locust import HttpUser, task, between
@@ -470,31 +489,10 @@ class DormUser(HttpUser):
         self.client.get("/external/geocode?postcode=E1 4NS")
 ```
 
-#### How to run
+### Notes
 
-1. Ensure the backend is running on `http://localhost:8000`.
-2. Install Locust (backend venv):
-
-```bash
-cd Backend
-pip install locust
-```
-
-3. Start Locust:
-
-```bash
-locust -f locustfile.py --host http://localhost:8000
-```
-
-4. Open `http://localhost:8089`, configure users and spawn rate, start the test, and monitor charts (RPS, failures, latency percentiles).
-
-#### Scenarios covered
-
-- GET `/` (health)
-- GET `/rooms` (listings)
-- GET `/external/geocode?postcode=E1 4NS` (geocoding)
-
-To extend with authenticated flows (login, applications), add a setup step to obtain a JWT from `/users/login` and include `Authorization: Bearer <token>` in subsequent requests.
+- You can change the target host with `--host http://<your-api-host>:<port>`.
+- To add authenticated flows later, obtain a JWT via `/users/login` in a setup step and include `Authorization: Bearer <token>` in subsequent requests.
 
 ## 📊 Performance Features
 
